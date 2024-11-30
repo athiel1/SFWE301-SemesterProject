@@ -1,0 +1,25 @@
+1,Aspirin,150,9.99,45,2024-12-31,false,Bayer Pharmaceuticals,lactose;gluten
+2,Lisinopril,90,24.99,30,2024-10-15,false,Merck & Co,soy;wheat
+3,Amoxicillin,200,15.50,75,2024-08-20,false,Pfizer Inc,penicillin;sulfa
+4,Metformin,100,19.99,50,2024-11-30,false,Bristol Myers Squibb,lactose
+5,Oxycodone,75,45.99,25,2024-09-15,true,Johnson & Johnson,none
+6,Sertraline,110,29.99,40,2024-07-25,false,GlaxoSmithKline,gelatin;soy
+7,Alprazolam,80,34.99,35,2024-06-30,true,Novartis,lactose;corn
+8,Hydrochlorothiazide,175,12.99,60,2024-12-15,false,Sanofi,sulfa
+9,Gabapentin,95,27.99,30,2024-11-01,false,Teva Pharmaceuticals,starch
+10,Metoprolol,130,18.99,45,2024-10-20,false,AstraZeneca,lactose;soy
+11,Prednisone,115,22.99,55,2024-09-10,false,Eli Lilly,gluten
+12,Amlodipine,85,25.99,40,2024-08-05,false,Abbott Labs,none
+13,Methylphenidate,70,39.99,20,2024-07-15,true,Roche,corn;soy
+14,Fluoxetine,160,28.99,65,2024-12-20,false,Merck & Co,gelatin
+15,Omeprazole,190,16.99,80,2024-11-25,false,AstraZeneca,lactose
+16,Levothyroxine,105,21.99,35,2024-10-30,false,Pfizer Inc,lactose;gluten
+17,Morphine,60,49.99,15,2024-09-20,true,Johnson & Johnson,none
+18,Escitalopram,145,31.99,50,2024-08-15,false,GlaxoSmithKline,soy
+19,Pantoprazole,170,19.99,70,2024-07-20,false,Novartis,none
+20,Tramadol,90,29.99,30,2024-06-25,true,Sanofi,lactose;starch
+21,Cetirizine,200,11.99,85,2024-12-10,false,Bayer Pharmaceuticals,none
+22,Duloxetine,120,35.99,40,2024-11-05,false,Eli Lilly,gelatin;soy
+23,Warfarin,95,23.99,25,2024-10-25,false,Bristol Myers Squibb,lactose
+24,Venlafaxine,110,32.99,45,2024-09-30,false,Teva Pharmaceuticals,corn
+25,Fentanyl,50,59.99,10,2024-08-25,true,Novartis,none
