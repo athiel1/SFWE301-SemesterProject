@@ -3,6 +3,8 @@ package Inventory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.time.LocalDate;
+
 
 public class Main {
     private static InventoryService inventoryService;
@@ -15,6 +17,8 @@ public class Main {
 
         // Load inventory using InventoryApp
         InventoryApp.loadInventoryFromFile(inventoryService, "Inventory.txt");
+        
+        
 
         boolean running = true;
         while (running) {
@@ -42,10 +46,13 @@ public class Main {
         System.out.println("5. 'check low stock' - View low stock notifications");
         System.out.println("6. 'reorder' - Process automatic reorders");
         System.out.println("7. 'print inventory' - Display complete inventory");
-        System.out.println("8. 'exit' - Exit the system");
+        System.out.println("8. 'print suppliers' - Display all suppliers and supplied medications");
+        System.out.println("9. 'expiring soon' - Display medications expiring within 30 days");
+        System.out.println("10. 'expired meds' - Display and manage expired medications");
+        System.out.println("11. 'exit' - Exit the system");
         System.out.print("Enter command: ");
     }
-    	    
+  
 
     private static void actionTask(String userInput) {
         switch (userInput) {
@@ -70,8 +77,98 @@ public class Main {
             case "print inventory":
                 printInventory();
                 break;
+            case "print suppliers":
+                printSuppliers();
+                break;
+            case "expiring soon":
+                expiringSoon();
+                break;
+            case "expired meds":
+                expiredMeds();
+                break;
             default:
                 System.out.println("Invalid command. Please try again.");
+        }
+    }
+
+    private static void expiringSoon() {
+        System.out.println("\n=== Medications Expiring Soon ===");
+        boolean foundExpiringSoon = false;
+        LocalDate currentDate = LocalDate.now();
+
+        for (InventoryItem item : inventoryService.getAllItems()) {
+            LocalDate expiryDate = LocalDate.parse(item.getExpDate());
+            if (!expiryDate.isBefore(currentDate) && expiryDate.isBefore(currentDate.plusDays(30))) {
+                System.out.println("Expiring Soon: " + item.getName() +
+                                   " (ID: " + item.getId() +
+                                   ") - Expiry Date: " + expiryDate);
+                foundExpiringSoon = true;
+            }
+        }
+
+        if (!foundExpiringSoon) {
+            System.out.println("No medications are expiring soon.");
+        }
+    }
+    private static void expiredMeds() {
+        System.out.println("\n=== Expired Medications ===");
+        boolean foundExpired = false;
+        LocalDate currentDate = LocalDate.now();
+
+        List<InventoryItem> expiredItems = new ArrayList<>();
+
+        // Find all expired medications
+        for (InventoryItem item : inventoryService.getAllItems()) {
+            LocalDate expiryDate = LocalDate.parse(item.getExpDate());
+            if (expiryDate.isBefore(currentDate)) {
+                expiredItems.add(item);
+                foundExpired = true;
+                System.out.println("Expired: " + item.getName() +
+                                   " (ID: " + item.getId() +
+                                   ") - Expiry Date: " + expiryDate +
+                                   ", Stock: " + item.getQuantity());
+            }
+        }
+
+        if (!foundExpired) {
+            System.out.println("No expired medications found.");
+            return;
+        }
+
+        // Ask user if they want to set all stock to 0
+        System.out.print("Do you want to set the stock for all expired medications to 0? (yes/no): ");
+        String response = scanner.nextLine().toLowerCase().trim();
+
+        if (response.equals("yes")) {
+            for (InventoryItem item : expiredItems) {
+                item.updateQuantity(-item.getQuantity()); // Set stock to 0
+                System.out.println("Stock set to 0 for: " + item.getName() + " (ID: " + item.getId() + ")");
+            }
+            System.out.println("Stock for all expired medications has been updated to 0.");
+        } else {
+            System.out.println("No changes made to expired medications.");
+        }
+    }
+
+
+    private static void printSuppliers() {
+    	// Initialize suppliers from inventory data
+        Supplier.loadSuppliers(inventoryService);
+        // Retrieve the list of all suppliers
+        List<Supplier> suppliers = Supplier.getSuppliers();
+
+        // Check if there are any suppliers
+        if (suppliers.isEmpty()) {
+            System.out.println("No suppliers found here.");
+            return;
+        }
+
+        // Print supplier details
+        System.out.println("List of Suppliers:");
+        for (Supplier supplier : suppliers) {
+            System.out.println("Supplier Name: " + supplier.getSupName());
+            System.out.println("Medicines Supplied: " + String.join(", ", supplier.getMedicines()));
+            System.out.println("--------------------------");
         }
     }
     private static void printInventory() {
@@ -85,12 +182,12 @@ public class Main {
 
         // Print header
         System.out.println(String.format("%-5s %-20s %-10s %-10s %-10s %-12s %-8s %-20s %-20s %-15s",
-            "ID", "Name", "Quantity", "Price($)", "Sold", "Expiry Date", "Control", "Supplier", "Allergens", "Total Value($)"));
-        System.out.println("----------------------------------------------------------------------------------------------------------------");
+            "ID", "Name", "Quantity", "Price($)", "Sold", "Expiry Date", "Cont. Subs.", "   Supplier", "   Allergens", "Total Value($)"));
+        System.out.println("------------------------------------------------------------------------------------------------------------------------------");
 
         // Print each item
         for (InventoryItem item : items) {
-            System.out.println(String.format("%-5d %-20s %-10d %-10.2f %-10d %-12s %-8b %-20s %-20s %-15.2f",
+            System.out.println(String.format("%-5d %-20s %-10d %-10.2f %-10d %-12s %-8b 	%-20s %-20s %-15.2f",
                 item.getId(),
                 truncateString(item.getName(), 20),
                 item.getQuantity(),
