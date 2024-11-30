@@ -1,14 +1,10 @@
 package Inventory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
-public class Main {    
+public class Main {
     private static InventoryService inventoryService;
     private static Scanner scanner;
     private static final int LOW_STOCK_THRESHOLD = 120;
@@ -17,64 +13,23 @@ public class Main {
         inventoryService = new InventoryService();
         scanner = new Scanner(System.in);
 
-        // Load initial inventory
-        loadInventory();
+        // Load inventory using InventoryApp
+        InventoryApp.loadInventoryFromFile(inventoryService, "Inventory.txt");
 
         boolean running = true;
         while (running) {
             printMenu();
             String userInput = scanner.nextLine().toLowerCase().trim();
-            
+
             if (userInput.equals("exit")) {
                 running = false;
                 continue;
             }
-            
+
             actionTask(userInput);
         }
-        
+
         scanner.close();
-    }
-
-    private static void loadInventory() {
-        String filePath = "Inventory Data.csv";
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            boolean isFirstLine = true;
-
-            while ((line = br.readLine()) != null) {
-                if (isFirstLine) {
-                    isFirstLine = false;
-                    continue;
-                }
-
-                String[] values = line.split(",");
-                if (values.length != 9) {
-                    System.out.println("Skipping malformed line: " + line);
-                    continue;
-                }
-
-                try {
-                    int id = Integer.parseInt(values[0].trim());
-                    String name = values[1].trim();
-                    int quantity = Integer.parseInt(values[2].trim());
-                    double price = Double.parseDouble(values[3].replace("$", "").trim());
-                    int amountSold = Integer.parseInt(values[4].trim());
-                    String expDate = values[5].trim();
-                    boolean conSubstance = Boolean.parseBoolean(values[6].trim());
-                    String supplier = values[7].trim();
-                    List<String> allergens = new ArrayList<>(Arrays.asList(values[8].trim().split(";")));
-
-                    inventoryService.addItem(id, name, quantity, price, amountSold, 
-                                          expDate, conSubstance, supplier, allergens);
-                } catch (NumberFormatException e) {
-                    System.out.println("Error parsing line: " + line);
-                }
-            }
-            System.out.println("Inventory loaded successfully!");
-        } catch (IOException e) {
-            System.out.println("Error reading inventory file: " + e.getMessage());
-        }
     }
 
     private static void printMenu() {
@@ -86,10 +41,11 @@ public class Main {
         System.out.println("4. 'update expired' - Update expired medications");
         System.out.println("5. 'check low stock' - View low stock notifications");
         System.out.println("6. 'reorder' - Process automatic reorders");
-        System.out.println("7. 'print inventory' - Display complete inventory");  // New option
+        System.out.println("7. 'print inventory' - Display complete inventory");
         System.out.println("8. 'exit' - Exit the system");
         System.out.print("Enter command: ");
     }
+    	    
 
     private static void actionTask(String userInput) {
         switch (userInput) {
@@ -111,7 +67,7 @@ public class Main {
             case "reorder":
                 processReorder();
                 break;
-            case "print inventory":    // New case
+            case "print inventory":
                 printInventory();
                 break;
             default:
