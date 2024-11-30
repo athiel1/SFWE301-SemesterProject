@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class InventoryApp {
-
     public static void main(String[] args) {
         InventoryService inventoryService = new InventoryService();
         String filePath = "Inventory Data.csv";
@@ -25,23 +24,32 @@ public class InventoryApp {
                 }
 
                 String[] values = line.split(",");
-                if (values.length != 8) { // Adjusted for 8 fields including id
+                if (values.length != 9) { // Adjusted for 9 fields
                     System.out.println("Skipping malformed line: " + line);
-                    continue; // Skip lines that don't match the expected format
+                    continue;
                 }
 
-                String name = values[0].trim();
-                int id = Integer.parseInt(values[1].trim()); // Parse ID
-                double price = Double.parseDouble(values[2].replace("$", "").trim());
-                int quantity = Integer.parseInt(values[3].trim());
-                int amtSold = Integer.parseInt(values[4].trim());
-                String expDate = values[5].trim();
-                boolean conSubstance = Boolean.parseBoolean(values[6].trim());
-                List<String> allergens = new ArrayList<>(Arrays.asList(values[7].trim().split(",")));
+                try {
+                    // Parse values in new order
+                    int id = Integer.parseInt(values[0].trim());
+                    String name = values[1].trim();
+                    int quantity = Integer.parseInt(values[2].trim());
+                    double price = Double.parseDouble(values[3].replace("$", "").trim());
+                    int amountSold = Integer.parseInt(values[4].trim());
+                    String expDate = values[5].trim();
+                    boolean conSubstance = Boolean.parseBoolean(values[6].trim());
+                    String supplier = values[7].trim();
+                    List<String> allergens = new ArrayList<>(Arrays.asList(values[8].trim().split(";")));
 
-                // Add item to inventory with specified ID
-                InventoryItem item = new InventoryItem(id, name, quantity, price, amtSold, expDate, allergens, conSubstance);
-                inventoryService.addItem(name, quantity, price, amtSold, expDate, allergens, conSubstance);
+                    // Add item to inventory
+                    inventoryService.addItem(id, name, quantity, price, amountSold, 
+                                          expDate, conSubstance, supplier, allergens);
+
+                } catch (NumberFormatException e) {
+                    System.out.println("Error parsing values in line: " + line);
+                    System.out.println("Error: " + e.getMessage());
+                    continue;
+                }
             }
 
             System.out.println("Inventory loaded successfully!");
