@@ -1,6 +1,7 @@
 package Inventory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.time.LocalDate;
@@ -49,9 +50,11 @@ public class Main {
         System.out.println("8. 'print suppliers' - Display all suppliers and supplied medications");
         System.out.println("9. 'expiring soon' - Display medications expiring within 30 days");
         System.out.println("10. 'expired meds' - Display and manage expired medications");
-        System.out.println("11. 'exit' - Exit the system");
+        System.out.println("11. 'view logs' - View system activity logs");    // New option
+        System.out.println("12. 'exit' - Exit the system");
         System.out.print("Enter command: ");
     }
+
   
 
     private static void actionTask(String userInput) {
@@ -85,6 +88,9 @@ public class Main {
                 break;
             case "expired meds":
                 expiredMeds();
+                break;
+            case "view logs":    // New case
+                viewInventoryLogs();
                 break;
             default:
                 System.out.println("Invalid command. Please try again.");
@@ -232,7 +238,26 @@ public class Main {
     }
 
     private static void updateInventory() {
-        System.out.println("\n=== Update Inventory ===");
+        System.out.println("\n=== Inventory Management ===");
+        System.out.println("1. Make changes to existing item");
+        System.out.println("2. Add new item");
+        System.out.print("Enter your choice (1 or 2): ");
+        
+        String choice = scanner.nextLine();
+
+        switch (choice) {
+            case "1":
+                updateExistingItem();
+                break;
+            case "2":
+                addNewInventoryItem();
+                break;
+            default:
+                System.out.println("Invalid choice. Returning to main menu.");
+        }
+    }
+
+    private static void updateExistingItem() {
         System.out.print("Enter item ID: ");
         int id = Integer.parseInt(scanner.nextLine());
 
@@ -258,6 +283,51 @@ public class Main {
         System.out.println("Item not found!");
     }
 
+    private static void addNewInventoryItem() {
+        try {
+            System.out.println("\n=== Add New Inventory Item ===");
+            
+            System.out.print("Enter medication name: ");
+            String name = scanner.nextLine();
+
+            System.out.print("Enter quantity: ");
+            int quantity = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("Enter price: ");
+            double price = Double.parseDouble(scanner.nextLine());
+
+            System.out.print("Enter amount sold: ");
+            int amountSold = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("Enter expiry date (YYYY-MM-DD): ");
+            String expDate = scanner.nextLine();
+
+            System.out.print("Is this a controlled substance? (true/false): ");
+            boolean conSubstancePackage = Boolean.parseBoolean(scanner.nextLine());
+
+            System.out.print("Enter supplier name: ");
+            String supplier = scanner.nextLine();
+
+            System.out.print("Enter allergens (separate with semicolons, or 'none'): ");
+            String allergensInput = scanner.nextLine();
+            List<String> allergens = new ArrayList<>();
+            if (!allergensInput.equalsIgnoreCase("none")) {
+                allergens = Arrays.asList(allergensInput.split(";"));
+            }
+
+            // Add the new item using the addNewItem method
+            inventoryService.addNewItem(name, quantity, price, amountSold, 
+                                      expDate, conSubstancePackage, supplier, allergens);
+
+            System.out.println("New item added successfully!");
+            
+        } catch (NumberFormatException e) {
+            System.out.println("Error: Please enter valid numeric values for quantity, price, and amount sold.");
+        } catch (Exception e) {
+            System.out.println("Error adding item: " + e.getMessage());
+        }
+    }
+
     private static void updateStock() {
         System.out.println("\n=== Update Stock ===");
         System.out.print("Enter item ID: ");
@@ -279,13 +349,35 @@ public class Main {
         System.out.println("\n=== Update Expired Medications ===");
         System.out.print("Enter item ID: ");
         int id = Integer.parseInt(scanner.nextLine());
-        System.out.print("Enter new expiry date (YYYY-MM-DD): ");
-        String newDate = scanner.nextLine();
-
+        
         for (InventoryItem item : inventoryService.getAllItems()) {
             if (item.getId() == id) {
-                item.setExpDate(newDate);
-                System.out.println("Expiry date updated successfully!");
+                String oldDate = item.getExpDate();
+                System.out.print("Enter new expiry date (YYYY-MM-DD) or 'remove' to remove expired stock: ");
+                String input = scanner.nextLine();
+                
+                if (input.equalsIgnoreCase("remove")) {
+                    int oldQuantity = item.getQuantity();
+                    item.setQuantity(0);
+                    
+                    // Log the removal
+                    LogManager.logChange(item, "EXPIRY_REMOVAL",
+                        "Quantity: " + oldQuantity + ", Expiry: " + oldDate,
+                        "REMOVED",
+                        "SYSTEM");
+                    
+                    System.out.println("Expired medication removed from inventory.");
+                } else {
+                    item.setExpDate(input);
+                    
+                    // Log the expiry date update
+                    LogManager.logChange(item, "EXPIRY_UPDATE",
+                        oldDate,
+                        input,
+                        "SYSTEM");
+                    
+                    System.out.println("Expiry date updated successfully!");
+                }
                 return;
             }
         }
@@ -314,7 +406,6 @@ public class Main {
         System.out.println("\n=== Process Reorders ===");
         List<InventoryItem> lowStockItems = new ArrayList<>();
 
-        // Collect all low stock items
         for (InventoryItem item : inventoryService.getAllItems()) {
             if (item.getQuantity() < LOW_STOCK_THRESHOLD) {
                 lowStockItems.add(item);
@@ -335,7 +426,18 @@ public class Main {
         if (response.equals("yes")) {
             for (InventoryItem item : lowStockItems) {
                 int orderQuantity = LOW_STOCK_THRESHOLD - item.getQuantity();
-                System.out.println("Ordering " + orderQuantity + " units of " + item.getName() + 
+                int oldQuantity = item.getQuantity();
+                
+                // Update quantity
+                item.updateQuantity(orderQuantity);
+                
+                // Log the reorder
+                LogManager.logChange(item, "REORDER", 
+                    String.valueOf(oldQuantity),
+                    String.valueOf(item.getQuantity()),
+                    "SYSTEM");
+                
+                System.out.println("Ordered " + orderQuantity + " units of " + item.getName() + 
                                  " from supplier: " + item.getSupplier());
             }
             System.out.println("Orders processed successfully!");
@@ -343,4 +445,35 @@ public class Main {
             System.out.println("Reorder cancelled.");
         }
     }
+    private static void viewInventoryLogs() {
+        System.out.println("\n=== View Inventory Logs ===");
+        System.out.println("1. View all logs");
+        System.out.println("2. View stock updates");
+        System.out.println("3. View price changes");
+        System.out.println("4. View supplier changes");
+        System.out.println("5. View expiry removals");
+        System.out.print("Enter choice: ");
+        
+        String choice = scanner.nextLine();
+        switch (choice) {
+            case "1":
+                LogManager.viewAllLogs();
+                break;
+            case "2":
+                LogManager.viewLogsByType("STOCK_UPDATE");
+                break;
+            case "3":
+                LogManager.viewLogsByType("PRICE_UPDATE");
+                break;
+            case "4":
+                LogManager.viewLogsByType("SUPPLIER_UPDATE");
+                break;
+            case "5":
+                LogManager.viewLogsByType("EXPIRY_REMOVAL");
+                break;
+            default:
+                System.out.println("Invalid choice!");
+        }
+    }
+
 }
