@@ -194,25 +194,26 @@ public class Main {
         }
 
         // Print header
-        System.out.println(String.format("%-5s %-20s %-10s %-10s %-10s %-12s %-8s %-20s %-20s %-15s",
-            "ID", "Name", "Quantity", "Price($)", "Sold", "Expiry Date", "Cont. Subs.", "   Supplier", "   Allergens", "Total Value($)"));
+        System.out.println(String.format("%-5s %-20s %-10s %-10s %-10s %-12s %-15s %-20s %-20s %-15s",
+            "ID", "Name", "Quantity", "Price($)", "Sold", "Expiry Date", "Cont. Subs.", "Supplier", "Allergens", "Total Value($)"));
         System.out.println("------------------------------------------------------------------------------------------------------------------------------");
 
         // Print each item
         for (InventoryItem item : items) {
-            System.out.println(String.format("%-5d %-20s %-10d %-10.2f %-10d %-12s %-8b 	%-20s %-20s %-15.2f",
+            System.out.println(String.format("%-5d %-20s %-10d %-10.2f %-10d %-12s %-15b %-20s %-20s %-15.2f",
                 item.getId(),
-                item.getName(), 20,
-                item.getQuantity(),
-                item.getPrice(),
-                item.getAmountSold(),
-                item.getExpDate(),
-                item.isConSubstancePackage(),
-                item.getSupplier(), 20,
-                item.getAllergen().toString(), 20,
-                item.calculateTotalValue()
+                item.getName(),
+                item.getQuantity(),                 // Integer, uses %d
+                item.getPrice(),                    // Double, uses %.2f
+                item.getAmountSold(),               // Integer, uses %d
+                item.getExpDate(),                  // String, uses %s
+                item.isConSubstancePackage(),       // Boolean, uses %b
+                item.getSupplier(),                 // String, uses %s
+                String.join(", ", item.getAllergen()), // List<String> to comma-separated string
+                item.calculateTotalValue()          // Double, uses %.2f
             ));
         }
+
         // Print summary
         System.out.println("\nInventory Summary:");
         System.out.println("Total number of items: " + items.size());
