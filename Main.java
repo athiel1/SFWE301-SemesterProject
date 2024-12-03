@@ -11,14 +11,16 @@ public class Main {
     private static InventoryService inventoryService;
     private static Scanner scanner;
     private static final int LOW_STOCK_THRESHOLD = 120;
+    private static StockForecasting stockForecasting;
 
     public static void main(String[] args) {
         inventoryService = new InventoryService();
         scanner = new Scanner(System.in);
-
+        stockForecasting = new StockForecasting();
         // Load inventory using InventoryApp
         InventoryApp.loadInventoryFromFile(inventoryService, "Inventory.txt");
-        
+        // Load usage history for forecasting
+        stockForecasting.loadUsageHistory();
         
 
         boolean running = true;
@@ -50,7 +52,8 @@ public class Main {
         System.out.println("8. 'print suppliers' - Display all suppliers and supplied medications");
         System.out.println("9. 'expiring soon' - Display medications expiring within 30 days");
         System.out.println("10. 'expired meds' - Display and manage expired medications");
-        System.out.println("11. 'view logs' - View system activity logs");    // New option
+        System.out.println("11. 'view logs' - View system activity logs");    
+        System.out.println("12. 'stock forecast' - View Low Stock Forecast based on previous sales trends");
         System.out.println("12. 'exit' - Exit the system");
         System.out.print("Enter command: ");
     }
@@ -92,6 +95,10 @@ public class Main {
             case "view logs":    // New case
                 viewInventoryLogs();
                 break;
+            case "stock forecast":
+            	viewLowStockForecast();
+            	break;
+            
             default:
                 System.out.println("Invalid command. Please try again.");
         }
@@ -195,14 +202,14 @@ public class Main {
         for (InventoryItem item : items) {
             System.out.println(String.format("%-5d %-20s %-10d %-10.2f %-10d %-12s %-8b 	%-20s %-20s %-15.2f",
                 item.getId(),
-                truncateString(item.getName(), 20),
+                item.getName(), 20,
                 item.getQuantity(),
                 item.getPrice(),
                 item.getAmountSold(),
                 item.getExpDate(),
                 item.isConSubstancePackage(),
-                truncateString(item.getSupplier(), 20),
-                truncateString(item.getAllergen().toString(), 20),
+                item.getSupplier(), 20,
+                item.getAllergen().toString(), 20,
                 item.calculateTotalValue()
             ));
         }
@@ -213,13 +220,6 @@ public class Main {
             String.format("%.2f", items.stream().mapToDouble(InventoryItem::calculateTotalValue).sum()));
     }
 
-    // Helper method to truncate long strings
-    private static String truncateString(String str, int length) {
-        if (str.length() <= length) {
-            return str;
-        }
-        return str.substring(0, length - 3) + "...";
-    }
     private static void updateSupplier() {
         System.out.println("\n=== Update Supplier ===");
         System.out.print("Enter item ID: ");
@@ -470,6 +470,24 @@ public class Main {
                 break;
             case "5":
                 LogManager.viewLogsByType("EXPIRY_REMOVAL");
+                break;
+            default:
+                System.out.println("Invalid choice!");
+        }
+    }
+    private static void viewLowStockForecast() {
+        System.out.println("\n=== Low Stock Analysis ===");
+        System.out.println("1. View current low stock items");
+        System.out.println("2. View stock forecast report");
+        System.out.print("Enter choice (1 or 2): ");
+        
+        String choice = scanner.nextLine();
+        switch (choice) {
+            case "1":
+                checkLowStock();
+                break;
+            case "2":
+                stockForecasting.displayForecastForAllItems(inventoryService);
                 break;
             default:
                 System.out.println("Invalid choice!");
