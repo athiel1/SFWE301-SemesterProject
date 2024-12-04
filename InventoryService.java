@@ -1,5 +1,6 @@
 package Inventory;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +49,13 @@ public class InventoryService {
             }
         }
         return false;
+    }
+    //Reorder expired medicine with new expiration dates.
+    public void reorderExpiredItem(InventoryItem item, int quantity) {
+        item.updateQuantity(quantity);
+        // Increment expiration date by one year
+        LocalDate currentExpiry = LocalDate.parse(item.getExpDate());
+        item.setExpDate(currentExpiry.plusYears(1).toString());
     }
 
     // Delete an item from inventory by ID
