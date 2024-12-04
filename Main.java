@@ -143,6 +143,7 @@ public class Main {
                 hasExpired = true;
                 expiredCount++;
             } else if (expiryDate.isBefore(currentDate.plusDays(30))) {
+            	
                 hasExpiringSoon = true;
                 expiringSoonCount++;
             }
@@ -150,17 +151,17 @@ public class Main {
 
         // Only display the panel if there are notifications
         if (hasExpired || hasExpiringSoon) {
-            System.out.println("\n╔════════════════ NOTIFICATION PANEL ════════════════╗");
+            System.out.println("\n╔════════════════ NOTIFICATION PANEL ════════════════════╗");
             
             if (hasExpired) {
-                System.out.printf("║ ⚠ WARNING: %d medication(s) have expired!           ║\n", expiredCount);
+                System.out.printf("║ ⚠ WARNING: %d medication(s) have expired!           	 ║\n", expiredCount);
             }
             if (hasExpiringSoon) {
-                System.out.printf("║ ℹ ALERT: %d medication(s) will expire in 30 days    ║\n", expiringSoonCount);
+                System.out.printf("║ ℹ ALERT: %d medication(s) will expire in 30 days   	 ║\n", expiringSoonCount);
             }
             
-            System.out.println("║ Use 'expired meds' or 'expiring soon' to view details ║");
-            System.out.println("╚═══════════════════════════════════════════════════════╝");
+            System.out.println("║ Use 'expired meds' or 'expiring soon' to view details  ║");
+            System.out.println("╚════════════════════════════════════════════════════════╝");
         }
     }
 
