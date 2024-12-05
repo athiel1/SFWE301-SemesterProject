@@ -72,7 +72,7 @@ public class Main {
         System.out.println("10. 'expired meds' - Display and manage expired medications");
         System.out.println("11. 'view logs' - View system activity logs");    
         System.out.println("12. 'stock forecast' - View Low Stock Forecast based on previous sales trends");
-        System.out.println("12. 'exit' - Exit the system");
+        System.out.println("13. 'exit' - Exit the system");
         System.out.print("Enter command: ");
     }
 
